@@ -586,7 +586,16 @@ function MapAppScreen() {
       ) : null}
 
       {panel === "login" || (panel === "detail" && selected) ? (
-        <OverlayPanel>
+        <OverlayPanel
+          onClose={
+            panel === "detail"
+              ? () => {
+                  setSelected(null);
+                  setPanel("none");
+                }
+              : undefined
+          }
+        >
           {panel === "login" ? (
             <LoginSheet
               error={authError}

@@ -248,7 +248,7 @@ export default function DetailPanel({
             rel="noopener noreferrer"
             className="flex h-11 items-center justify-center rounded-xl text-sm font-medium text-[var(--pin)] ring-1 ring-slate-200"
           >
-            {t("hoursAndInfo")}
+            {t("kakaoPlace")}
           </a>
         ) : lookingUp ? (
           <span className="flex h-11 items-center justify-center rounded-xl text-xs text-slate-400 ring-1 ring-slate-200">
