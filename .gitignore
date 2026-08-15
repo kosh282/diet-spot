@@ -1,0 +1,30 @@
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# next
+/.next/
+/out/
+
+# env
+.env
+.env*.local
+docs/.env
+
+# debug
+npm-debug.log*
+
+# ts
+next-env.d.ts
+*.tsbuildinfo
+
+# ide
+.idea
+.vscode
+.cursor

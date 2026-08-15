@@ -1,0 +1,319 @@
+@import "tailwindcss";
+
+:root {
+  --pin: #2a7a4f;
+  --pin-soft: #e7f3ec;
+  --pin-ink: #163d28;
+  --me: #2f7f9a;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family:
+    "Pretendard Variable",
+    Pretendard,
+    "Noto Sans KR",
+    ui-sans-serif,
+    system-ui,
+    sans-serif;
+  color: #1a1a1a;
+  background: #eef2ef;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.card {
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12);
+}
+
+.card-sheet {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+@media (min-width: 768px) {
+  .card-sheet {
+    border-radius: 1rem;
+  }
+}
+
+.ds-close {
+  display: flex;
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  margin: -10px -10px 0 0;
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ds-pin {
+  --label: var(--pin);
+  position: relative;
+  transform: translateX(-19px);
+  transform-origin: 19px 100%;
+  cursor: pointer;
+  user-select: none;
+  filter: drop-shadow(0 2px 6px rgba(15, 23, 42, 0.22));
+}
+
+.ds-pin-body {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 220px;
+  padding: 4px 12px 4px 5px;
+  background: #fff;
+  border: 1.5px solid var(--label);
+  border-radius: 999px;
+}
+
+.ds-pin-num {
+  display: flex;
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--label);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ds-pin-copy {
+  min-width: 0;
+  padding-right: 2px;
+}
+
+.ds-pin-name {
+  overflow: hidden;
+  color: #111;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-pin-tags {
+  overflow: hidden;
+  margin-top: 1px;
+  color: #8b8b8b;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-pin-stem {
+  display: block;
+  position: relative;
+  width: 12px;
+  height: 16px;
+  margin-left: 13px;
+  background: transparent;
+}
+
+.ds-pin-stem::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 5px;
+  width: 2px;
+  height: 100%;
+  background: var(--label);
+}
+
+.ds-pin--selected {
+  z-index: 2;
+  transform: translateX(-19px) scale(1.08);
+  filter: drop-shadow(0 6px 14px color-mix(in srgb, var(--pin) 38%, transparent));
+}
+
+.ds-pin--selected .ds-pin-body {
+  background: var(--pin);
+  border-color: var(--pin);
+  border-width: 1.5px;
+}
+
+.ds-pin--selected .ds-pin-name {
+  color: #fff;
+}
+
+.ds-pin--selected .ds-pin-tags {
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.ds-pin--selected .ds-pin-num {
+  background: #fff;
+  color: var(--pin);
+}
+
+.ds-pin--selected .ds-pin-stem::after {
+  background: var(--pin);
+}
+
+.ds-pin--closed {
+  --label: #94a3b8;
+}
+
+.ds-pin--unverified .ds-pin-body {
+  border-style: dashed;
+}
+
+.ds-pin--closed.ds-pin--selected .ds-pin-body {
+  background: #64748b;
+  border-color: #64748b;
+}
+
+.ds-pin--closed.ds-pin--selected .ds-pin-num {
+  color: #64748b;
+}
+
+.ds-pin--relocating .ds-pin-body {
+  border-style: dashed;
+}
+
+.ds-pin--compact .ds-pin-copy {
+  display: none;
+}
+
+.ds-pin--compact .ds-pin-body {
+  gap: 0;
+  padding-right: 5px;
+}
+
+.ds-pin-stack {
+  position: absolute;
+  z-index: 50;
+  min-width: 11.5rem;
+  max-width: 16rem;
+  max-height: 14rem;
+  overflow: auto;
+  padding: 0.4rem;
+  background: #fff;
+  border-radius: 0.9rem;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+}
+
+.ds-pin-stack-title {
+  padding: 0.35rem 0.55rem 0.45rem;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ds-pin-stack-item {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ds-pin-stack-item:hover,
+.ds-pin-stack-item.is-on {
+  background: var(--pin-soft);
+}
+
+.ds-pin-stack-num {
+  display: flex;
+  width: 1.35rem;
+  height: 1.35rem;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  background: var(--pin);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.ds-pin-stack-copy {
+  min-width: 0;
+}
+
+.ds-pin-stack-name {
+  overflow: hidden;
+  color: #111;
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-pin-stack-tags {
+  overflow: hidden;
+  color: #8b8b8b;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ds-me {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  pointer-events: none;
+}
+
+.ds-me-dot {
+  position: absolute;
+  inset: 4px;
+  border-radius: 50%;
+  background: var(--me);
+  border: 2px solid #fff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.35);
+}
+
+.ds-me-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--me) 35%, transparent);
+  animation: ds-me-pulse 1.8s ease-out infinite;
+}
+
+.ds-me--ip .ds-me-pulse {
+  background: color-mix(in srgb, var(--me) 18%, transparent);
+  animation: none;
+  transform: scale(1.6);
+}
+
+@keyframes ds-me-pulse {
+  0% {
+    transform: scale(0.6);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(2.2);
+    opacity: 0;
+  }
+}
