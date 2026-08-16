@@ -28,7 +28,7 @@ export default function FilterChips({ filters, onChange, showClosed, onShowClose
 
   return (
     <div className="card max-w-full space-y-2 px-3 py-2">
-      <div className="flex gap-2 overflow-x-auto pb-1">
+      <div className="ds-chip-scroll">
         {DIET_TAGS.map((tag) => {
           const on = filters.diet.includes(tag.value);
           return (
@@ -38,7 +38,7 @@ export default function FilterChips({ filters, onChange, showClosed, onShowClose
               onClick={() =>
                 onChange({ ...filters, diet: toggleTag(filters.diet, tag.value) })
               }
-              className={`shrink-0 rounded-full px-3 py-1 text-xs font-medium ${
+              className={`shrink-0 rounded-full px-3.5 py-2 text-sm font-medium md:px-3 md:py-1 md:text-xs ${
                 on ? "bg-[var(--pin)] text-white" : "bg-slate-100 text-slate-700"
               }`}
             >
@@ -49,13 +49,13 @@ export default function FilterChips({ filters, onChange, showClosed, onShowClose
         <button
           type="button"
           onClick={() => setMore((value) => !value)}
-          className="shrink-0 rounded-full bg-white px-3 py-1 text-xs font-medium text-slate-600 ring-1 ring-slate-200"
+          className="shrink-0 rounded-full bg-white px-3.5 py-2 text-sm font-medium text-slate-600 ring-1 ring-slate-200 md:px-3 md:py-1 md:text-xs"
         >
           {more ? t("less") : t("more")}
         </button>
       </div>
       {more ? (
-        <div className="space-y-2">
+        <div className="space-y-2 max-md:max-h-[32vh] max-md:overflow-y-auto max-md:overscroll-contain">
           <ChipRow
             label={t("cuisine")}
             options={CUISINE_TAGS.map((tag) => ({
@@ -83,7 +83,7 @@ export default function FilterChips({ filters, onChange, showClosed, onShowClose
             <button
               type="button"
               onClick={() => onShowClosed(!showClosed)}
-              className={`rounded-full px-2.5 py-1 text-xs ${
+              className={`rounded-full px-3 py-1.5 text-sm md:px-2.5 md:py-1 md:text-xs ${
                 showClosed ? "bg-[var(--pin)] text-white" : "bg-slate-100 text-slate-700"
               }`}
             >
@@ -118,7 +118,7 @@ function ChipRow<T extends string>({
               key={tag.value}
               type="button"
               onClick={() => onToggle(tag.value)}
-              className={`rounded-full px-2.5 py-1 text-xs ${
+              className={`rounded-full px-3 py-1.5 text-sm md:px-2.5 md:py-1 md:text-xs ${
                 on ? "bg-[var(--pin)] text-white" : "bg-slate-100 text-slate-700"
               }`}
             >

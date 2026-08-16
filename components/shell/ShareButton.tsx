@@ -15,7 +15,7 @@ export default function ShareButton({ onClick }: Props) {
       onClick={onClick}
       title={t("shareMap")}
       aria-label={t("shareMap")}
-      className="card flex h-12 w-12 shrink-0 items-center justify-center text-[var(--pin)]"
+      className="card flex h-11 w-11 shrink-0 items-center justify-center text-[var(--pin)] md:h-12 md:w-12"
     >
       <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden="true">
         <path

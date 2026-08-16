@@ -14,7 +14,7 @@ export default function SearchBar({ onOpenRegister, active = false }: Props) {
       type="button"
       onClick={onOpenRegister}
       aria-expanded={active}
-      className={`card flex h-12 min-w-0 flex-1 items-center gap-2 px-3 text-left text-sm text-slate-500 md:max-w-md ${
+      className={`card flex h-11 min-w-0 flex-1 items-center gap-2 px-3 text-left text-sm text-slate-500 md:h-12 md:max-w-md ${
         active ? "ring-2 ring-[var(--pin)]" : ""
       }`}
     >

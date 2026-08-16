@@ -7,7 +7,7 @@ import CloseButton from "@/components/shell/CloseButton";
 import PlaceAddress from "@/components/spot/PlaceAddress";
 import PlaceName from "@/components/spot/PlaceName";
 import TagPicker from "@/components/spot/TagPicker";
-import { kakaoMapPinUrl, kakaoPlacePageUrl, resolveKakaoPlacePage } from "@/lib/kakao";
+import { kakaoPlacePageUrl, resolveKakaoPlacePage } from "@/lib/kakao";
 import { memoForLocale } from "@/lib/place-name";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 import { cuisineLabel, dietChipLabel, dietLabel, venueLabel, type CuisineTag, type DietTag, type VenueTag } from "@/lib/tags";
@@ -196,22 +196,28 @@ export default function DetailPanel({
       </div>
 
       {editing ? (
-        <label className="block text-xs font-medium text-slate-600">
-          {t("address")}
-          <input
-            value={address}
-            onChange={(event) => setAddress(event.target.value)}
-            className="mt-1 h-10 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal text-slate-800"
-            placeholder={t("roadAddressPlaceholder")}
-          />
-        </label>
+        <div>
+          <label className="block text-xs font-medium text-slate-600">
+            {t("address")}
+            <input
+              value={address}
+              onChange={(event) => setAddress(event.target.value)}
+              className="mt-1 h-10 w-full rounded-xl border border-slate-200 px-3 text-sm font-normal text-slate-800"
+              placeholder={t("roadAddressPlaceholder")}
+            />
+          </label>
+          {phone ? <p className="mt-1 text-sm text-slate-600">{phone}</p> : null}
+        </div>
       ) : (
         <div className="flex items-start justify-between gap-3">
-          {spot.address ? (
-            <PlaceAddress address={spot.address} className="text-sm text-slate-700" />
-          ) : (
-            <span />
-          )}
+          <div className="min-w-0">
+            {spot.address ? (
+              <PlaceAddress address={spot.address} className="text-sm text-slate-700" />
+            ) : null}
+            {phone ? (
+              <p className={`text-sm text-slate-600 ${spot.address ? "mt-1" : ""}`}>{phone}</p>
+            ) : null}
+          </div>
           <button
             type="button"
             onClick={() => {
@@ -229,40 +235,23 @@ export default function DetailPanel({
       )}
 
       <div className="grid grid-cols-3 gap-2">
-        {phone ? (
-          <a
-            href={`tel:${phone}`}
-            className="flex h-11 items-center justify-center rounded-xl bg-[var(--pin)] text-sm font-medium text-white"
-          >
-            {t("callPlace")}
-          </a>
-        ) : (
-          <span className="flex h-11 items-center justify-center rounded-xl bg-slate-100 text-xs text-slate-400">
-            {t("noPhone")}
-          </span>
-        )}
         {placeUrl ? (
           <a
             href={placeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex h-11 items-center justify-center rounded-xl text-sm font-medium text-[var(--pin)] ring-1 ring-slate-200"
+            className="col-span-2 flex h-11 items-center justify-center rounded-xl text-sm font-medium text-[var(--pin)] ring-1 ring-slate-200"
           >
             {t("kakaoPlace")}
           </a>
         ) : lookingUp ? (
-          <span className="flex h-11 items-center justify-center rounded-xl text-xs text-slate-400 ring-1 ring-slate-200">
+          <span className="col-span-2 flex h-11 items-center justify-center rounded-xl text-xs text-slate-400 ring-1 ring-slate-200">
             {t("lookingUpPlace")}
           </span>
         ) : (
-          <a
-            href={kakaoMapPinUrl(spot)}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex h-11 items-center justify-center rounded-xl text-sm font-medium text-[var(--pin)] ring-1 ring-slate-200"
-          >
-            {t("viewOnMap")}
-          </a>
+          <span className="col-span-2 flex h-11 items-center justify-center rounded-xl text-xs text-slate-400 ring-1 ring-slate-200">
+            {t("kakaoPlace")}
+          </span>
         )}
         <button
           type="button"

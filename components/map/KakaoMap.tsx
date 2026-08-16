@@ -49,6 +49,13 @@ type StackPick = {
 const PIN_GREEN = "#2a7a4f";
 const ME_TEAL = "#2f7f9a";
 
+function compactPinLabels(level: number) {
+  if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
+    return level >= 5;
+  }
+  return level >= 6;
+}
+
 const DRAG_HANDLE = (() => {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18">
     <circle cx="9" cy="9" r="7" fill="${PIN_GREEN}" stroke="white" stroke-width="2"/>
@@ -245,7 +252,7 @@ export default function KakaoMap({
     hoverIdRef.current = null;
     setStack(null);
 
-    const compact = map.getLevel() >= 6;
+    const compact = compactPinLabels(map.getLevel());
     overlaysRef.current = spots.map((spot, index) => {
       const relocating = spot.id === relocatingId;
       const lat = relocating && relocatingPosition ? relocatingPosition.lat : spot.lat;
@@ -340,7 +347,7 @@ export default function KakaoMap({
     if (!mapReady || !map || !window.kakao?.maps) return;
 
     const applyZoom = () => {
-      const compact = map.getLevel() >= 6;
+      const compact = compactPinLabels(map.getLevel());
       overlaysRef.current.forEach((entry) => {
         entry.root.classList.toggle("ds-pin--compact", compact);
       });

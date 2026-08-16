@@ -53,7 +53,7 @@ export default function TagPicker({
                 type="button"
                 disabled={locked}
                 onClick={() => onDiet(toggleTag(diet, tag.value))}
-                className={`rounded-full px-2.5 py-1 text-xs ${
+                className={`rounded-full px-3 py-1.5 text-sm md:px-2.5 md:py-1 md:text-xs ${
                   on ? "bg-[var(--pin)] text-white" : "bg-slate-100"
                 } ${locked ? "cursor-not-allowed opacity-50" : ""}`}
               >
@@ -76,7 +76,7 @@ export default function TagPicker({
                 key={tag.value}
                 type="button"
                 onClick={() => onCuisine(toggleTag(cuisine, tag.value))}
-                className={`rounded-full px-2.5 py-1 text-xs ${
+                className={`rounded-full px-3 py-1.5 text-sm md:px-2.5 md:py-1 md:text-xs ${
                   on ? "bg-[var(--pin)] text-white" : "bg-slate-100"
                 }`}
               >
@@ -96,7 +96,7 @@ export default function TagPicker({
                 key={tag.value}
                 type="button"
                 onClick={() => onVenue(toggleTag(venue, tag.value))}
-                className={`rounded-full px-2.5 py-1 text-xs ${
+                className={`rounded-full px-3 py-1.5 text-sm md:px-2.5 md:py-1 md:text-xs ${
                   on ? "bg-[var(--pin)] text-white" : "bg-slate-100"
                 }`}
               >

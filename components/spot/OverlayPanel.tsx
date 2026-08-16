@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useI18n } from "@/components/i18n/LocaleProvider";
+import Sheet from "@/components/shell/Sheet";
 
 type Props = {
   children: ReactNode;
@@ -9,21 +9,12 @@ type Props = {
 };
 
 export default function OverlayPanel({ children, onClose }: Props) {
-  const { t } = useI18n();
   return (
-    <>
-      {onClose ? (
-        <button
-          type="button"
-          aria-label={t("close")}
-          onClick={onClose}
-          className="pointer-events-auto absolute inset-0 z-20 bg-slate-900/20"
-        />
-      ) : null}
-      <aside className="card card-sheet pointer-events-auto absolute inset-x-0 bottom-0 z-30 max-h-[min(78vh,36rem)] overflow-y-auto p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:inset-auto md:bottom-8 md:right-4 md:top-24 md:w-[380px] md:max-h-[calc(100dvh-8rem)] md:pb-4">
-        <div className="mx-auto mb-3 h-1 w-10 rounded-full bg-slate-200 md:hidden" aria-hidden />
-        {children}
-      </aside>
-    </>
+    <Sheet
+      onClose={onClose}
+      className="card card-sheet pointer-events-auto absolute inset-x-0 bottom-0 z-30 max-h-[min(56dvh,30rem)] overflow-y-auto overscroll-contain p-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:inset-auto md:bottom-8 md:right-4 md:top-24 md:w-[380px] md:max-h-[calc(100dvh-8rem)] md:pb-4"
+    >
+      {children}
+    </Sheet>
   );
 }

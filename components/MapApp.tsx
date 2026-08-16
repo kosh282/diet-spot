@@ -21,6 +21,7 @@ import { localSeedSpots, persistSeedSpots } from "@/lib/seed-candidates";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 import { matchesFilters, type TagFilters } from "@/lib/tags";
 import { emptyMapSearch, parseMapSearch, replaceMapUrl } from "@/lib/map-url";
+import { displayPlaceName } from "@/lib/place-name";
 import { RETURN_TO_KEY, type KakaoPlace, type Spot } from "@/lib/types";
 import { displayNameFromUser } from "@/lib/user";
 import {
@@ -231,10 +232,21 @@ function MapAppScreen() {
       spotId: panel === "detail" && selected ? selected.id : null,
       locale,
     });
+    const url = `${window.location.origin}${window.location.pathname}${window.location.search}`;
+    const title =
+      panel === "detail" && selected
+        ? displayPlaceName(selected.name, locale).primary
+        : "DietSpot";
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({ title, text: t("shareMap"), url });
+        return;
+      } catch (err) {
+        if (err instanceof Error && err.name === "AbortError") return;
+      }
+    }
     try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}${window.location.pathname}${window.location.search}`,
-      );
+      await navigator.clipboard.writeText(url);
       setToast(t("linkCopied"));
     } catch {
       setToast(t("copyFailed"));
@@ -462,7 +474,7 @@ function MapAppScreen() {
         }}
       />
 
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-40 px-3 pb-3 pt-[max(0.75rem,env(safe-area-inset-top))] md:p-4">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-40 px-3 pb-2 pt-[max(0.5rem,env(safe-area-inset-top))] md:p-4">
         <div className="pointer-events-auto flex items-center gap-2">
           <span className="card hidden h-12 items-center px-3 text-sm font-semibold text-[var(--pin)] md:flex">
             DietSpot
@@ -478,7 +490,7 @@ function MapAppScreen() {
 
       <div className="pointer-events-none absolute inset-0 z-10">
         {panel !== "register" ? (
-          <div className="pointer-events-auto min-w-0 px-3 pt-[calc(4.35rem+env(safe-area-inset-top))] md:px-4 md:pt-[4.85rem]">
+          <div className="pointer-events-auto min-w-0 px-3 pt-[calc(3.85rem+env(safe-area-inset-top))] md:px-4 md:pt-[4.85rem]">
             <FilterChips
               filters={filters}
               onChange={setFilters}

@@ -49,7 +49,13 @@ function distanceMeters(lat1: number, lng1: number, lat2: number, lng2: number) 
   return 2 * 6371000 * Math.asin(Math.sqrt(a));
 }
 
-function pickNearbyPlace(results: KakaoPlace[], lat: number, lng: number, name: string) {
+function pickNearbyPlace(
+  results: KakaoPlace[],
+  lat: number,
+  lng: number,
+  name: string,
+  maxMeters = 800,
+) {
   const compact = name.replace(/\s/g, "");
   const named = results.filter((item) => item.place_name.replace(/\s/g, "").includes(compact.slice(0, 3)));
   const pool = named.length > 0 ? named : results;
@@ -62,7 +68,25 @@ function pickNearbyPlace(results: KakaoPlace[], lat: number, lng: number, name: 
       bestDistance = distance;
     }
   }
-  return bestDistance < 800 ? best : null;
+  return bestDistance < maxMeters ? best : null;
+}
+
+function waitForKakaoServices(timeoutMs = 4000) {
+  return new Promise<boolean>((resolve) => {
+    const started = Date.now();
+    const tick = () => {
+      if (window.kakao?.maps?.services) {
+        resolve(true);
+        return;
+      }
+      if (Date.now() - started >= timeoutMs) {
+        resolve(false);
+        return;
+      }
+      window.setTimeout(tick, 100);
+    };
+    tick();
+  });
 }
 
 export function searchKakaoPlaces(
@@ -111,13 +135,30 @@ export async function resolveKakaoPlacePage(spot: {
   lng: number;
   place_id: string;
   place_url?: string | null;
+  phone?: string | null;
 }) {
   const stored = kakaoPlacePageUrl(spot.place_url, spot.place_id);
-  if (stored) return { place_url: stored, phone: null as string | null };
-  const match = await searchKakaoPlace(spot.name, { lat: spot.lat, lng: spot.lng });
-  if (!match) return null;
-  return {
-    place_url: kakaoPlacePageUrl(match.place_url, match.id),
-    phone: match.phone,
-  };
+  if (stored && spot.phone) return { place_url: stored, phone: spot.phone };
+
+  const ready = await waitForKakaoServices();
+  if (!ready) return stored ? { place_url: stored, phone: spot.phone ?? null } : null;
+
+  try {
+    let rows = await searchKakaoPlaces(spot.name, { lat: spot.lat, lng: spot.lng });
+    if (rows.length === 0) {
+      rows = await searchKakaoPlaces(spot.name);
+    }
+    const match =
+      pickNearbyPlace(rows, spot.lat, spot.lng, spot.name, 1500) ??
+      pickNearbyPlace(rows, spot.lat, spot.lng, spot.name, 4000) ??
+      rows[0] ??
+      null;
+    if (!match && !stored) return null;
+    return {
+      place_url: stored ?? kakaoPlacePageUrl(match?.place_url, match?.id),
+      phone: spot.phone || match?.phone || null,
+    };
+  } catch {
+    return stored ? { place_url: stored, phone: spot.phone ?? null } : null;
+  }
 }

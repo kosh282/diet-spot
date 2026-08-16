@@ -1,13 +1,66 @@
 import type { Metadata, Viewport } from "next";
+import { SITE_DESCRIPTION, SITE_NAME, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DietSpot",
-  description: "A shared restaurant map to filter vegetarian and halal tags · 채식·할랄 태그를 지도에서 걸러 보는 공유 맛집 지도",
+  metadataBase: new URL(siteUrl()),
+  title: {
+    default: SITE_NAME,
+    template: `%s · ${SITE_NAME}`,
+  },
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
+  keywords: [
+    "DietSpot",
+    "채식",
+    "비건",
+    "할랄",
+    "맛집",
+    "지도",
+    "vegetarian",
+    "vegan",
+    "halal",
+    "Seoul",
+    "동국대",
+    "충무로",
+  ],
+  authors: [{ name: SITE_NAME }],
+  creator: SITE_NAME,
+  category: "food",
+  formatDetection: {
+    telephone: false,
+    email: false,
+    address: false,
+  },
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    alternateLocale: ["en_US"],
+    url: "/",
+    siteName: SITE_NAME,
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: SITE_NAME,
+    description: SITE_DESCRIPTION,
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  appleWebApp: {
+    capable: true,
+    title: SITE_NAME,
+    statusBarStyle: "default",
+  },
 };
 
 export const viewport: Viewport = {
   viewportFit: "cover",
+  themeColor: "#2a7a4f",
+  colorScheme: "light",
 };
 
 export default function RootLayout({
