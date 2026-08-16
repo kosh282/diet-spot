@@ -17,12 +17,13 @@ import OverlayPanel from "@/components/spot/OverlayPanel";
 import PlaceName from "@/components/spot/PlaceName";
 import RegisterSheet from "@/components/spot/RegisterSheet";
 import SearchModal from "@/components/spot/SearchModal";
+import SpotSearchSheet from "@/components/spot/SpotSearchSheet";
 import { localSeedSpots, persistSeedSpots } from "@/lib/seed-candidates";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 import { matchesFilters, type TagFilters } from "@/lib/tags";
 import { emptyMapSearch, parseMapSearch, replaceMapUrl } from "@/lib/map-url";
 import { displayPlaceName } from "@/lib/place-name";
-import { RETURN_TO_KEY, type KakaoPlace, type Spot } from "@/lib/types";
+import { REGISTER_QUERY_KEY, RETURN_TO_KEY, type KakaoPlace, type Spot } from "@/lib/types";
 import { displayNameFromUser } from "@/lib/user";
 import {
   getUserLocation,
@@ -31,7 +32,7 @@ import {
   type UserLocation,
 } from "@/lib/user-location";
 
-type Panel = "none" | "detail" | "register" | "login";
+type Panel = "none" | "detail" | "register" | "login" | "search";
 
 type RelocateDraft = {
   lat: number;
@@ -87,13 +88,16 @@ function MapAppScreen() {
   const [locating, setLocating] = useState(false);
   const seedingRef = useRef(false);
   const gpsWatchRef = useRef<(() => void) | null>(null);
+  const [registerQuery, setRegisterQuery] = useState("");
   const sharedSpotId = useRef(bootShare.spotId);
 
   const openSpots = useMemo(() => spots.filter((spot) => !spot.closed), [spots]);
   const visible = useMemo(() => {
     const pool = showClosed ? spots : openSpots;
-    return pool.filter((spot) => matchesFilters(spot, filters));
-  }, [spots, openSpots, filters, showClosed]);
+    return pool.filter(
+      (spot) => spot.id === selected?.id || matchesFilters(spot, filters),
+    );
+  }, [spots, openSpots, filters, showClosed, selected]);
 
   const loadSpots = useCallback(async () => {
     if (!supabase) return;
@@ -161,6 +165,9 @@ function MapAppScreen() {
     sessionStorage.removeItem(RETURN_TO_KEY);
     pendingReturn.current = null;
     if (next === "register") {
+      const saved = sessionStorage.getItem(REGISTER_QUERY_KEY) ?? "";
+      sessionStorage.removeItem(REGISTER_QUERY_KEY);
+      setRegisterQuery(saved);
       setPanel("register");
       return;
     }
@@ -258,15 +265,26 @@ function MapAppScreen() {
     setPanel("login");
   }
 
-  function openRegister() {
-    if (panel === "register") {
+  function openSearch() {
+    if (panel === "search") {
+      setPanel("none");
+      return;
+    }
+    setPanel("search");
+  }
+
+  function openRegister(prefill = "") {
+    if (panel === "register" && !prefill) {
       setPanel("none");
       return;
     }
     if (!user) {
+      if (prefill) sessionStorage.setItem(REGISTER_QUERY_KEY, prefill);
+      else sessionStorage.removeItem(REGISTER_QUERY_KEY);
       requireLogin("register");
       return;
     }
+    setRegisterQuery(prefill);
     setSelected(null);
     setPanel("register");
   }
@@ -479,7 +497,7 @@ function MapAppScreen() {
           <span className="card hidden h-12 items-center px-3 text-sm font-semibold text-[var(--pin)] md:flex">
             DietSpot
           </span>
-          <SearchBar onOpenRegister={openRegister} active={panel === "register"} />
+          <SearchBar onOpenSearch={openSearch} active={panel === "search"} />
           <div className="flex shrink-0 items-center gap-2">
             <ShareButton onClick={() => void shareCurrent()} />
             <LanguageSelect />
@@ -489,7 +507,7 @@ function MapAppScreen() {
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-10">
-        {panel !== "register" ? (
+        {panel !== "register" && panel !== "search" ? (
           <div className="pointer-events-auto min-w-0 px-3 pt-[calc(3.85rem+env(safe-area-inset-top))] md:px-4 md:pt-[4.85rem]">
             <FilterChips
               filters={filters}
@@ -534,7 +552,7 @@ function MapAppScreen() {
         </button>
         <button
           type="button"
-          onClick={openRegister}
+          onClick={() => openRegister()}
           className={`pointer-events-auto absolute right-4 bottom-[max(1.5rem,calc(env(safe-area-inset-bottom)+0.75rem))] flex h-12 items-center rounded-full bg-[var(--pin)] px-5 text-sm font-medium text-white shadow-lg md:bottom-8 ${
             panel === "none" && !relocating ? "md:right-4" : "md:right-[420px]"
           } ${relocating || panel !== "none" ? "hidden" : ""}`}
@@ -585,10 +603,23 @@ function MapAppScreen() {
         </div>
       ) : null}
 
+      {panel === "search" ? (
+        <SearchModal onClose={() => setPanel("none")}>
+          <SpotSearchSheet
+            spots={showClosed ? spots : openSpots}
+            origin={userLocation}
+            onClose={() => setPanel("none")}
+            onSelect={(spot) => openSpot(spot)}
+            onAdd={(query) => openRegister(query)}
+          />
+        </SearchModal>
+      ) : null}
+
       {panel === "register" ? (
         <SearchModal onClose={() => setPanel("none")}>
           <RegisterSheet
             spots={spots}
+            initialQuery={registerQuery}
             onClose={() => setPanel("none")}
             onOpenRegistered={(spot) => openSpot(spot)}
             onExisting={(spot) => openSpot(spot, true)}

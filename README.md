@@ -26,9 +26,10 @@ DietSpot은 사용자가 식당에 식단 태그와 짧은 메모를 붙이고, 
 ### 할 수 있는 일
 
 - 지도에서 식단 칩(채식, 할랄 등)으로 핀을 걸러 보기
+- 상단 검색으로 이미 올라간 상호·주소·태그를 찾아 핀으로 이동
 - 핀을 눌러 주소, 한·영 메모, 원등록자·마지막 수정을 보기
-- 전화, 카카오 장소(영업시간), 현재 필터가 붙은 지도 링크 공유
-- 카카오로 식당을 검색해 등록하기 (같은 장소는 `place_id`로 중복 불가, 식단 태그 필수)
+- 전화, 카카오 장소, 현재 필터가 붙은 지도 링크 공유
+- + 등록으로 카카오에서 식당을 검색해 올리기 (같은 장소는 `place_id`로 중복 불가, 식단 태그 필수)
 - 로그인한 사람이 메모·태그를 고치기 (삭제는 처음 올린 사람만)
 - 할랄 태그는 처음 올린 사람만 붙이거나 뗄 수 있음
 - 한국어 / English 전환, 로마자로 상호 검색
@@ -81,12 +82,13 @@ Anyone can browse. Google sign-in is required only to add or edit.
 ### What you can do
 
 - Filter pins with diet chips (vegetarian, halal, and others)
+- Search listed names, addresses, and tags from the header and jump to the pin
 - Open a pin for address, Korean and English notes, who added it, and who last edited it
-- Call, open Kakao place info (hours), or share a link that keeps the current filters
-- Search Kakao, pick a restaurant, and add it (duplicate `place_id` is blocked; at least one diet tag is required)
+- Call, open Kakao place info, or share a link that keeps the current filters
+- Use + Add to search Kakao and list a restaurant (duplicate `place_id` is blocked; at least one diet tag is required)
 - Edit notes and tags after login (only the original author can delete)
 - Only the original author can add or remove the Halal tag
-- Switch Korean / English and search registered names in Hangul or romanization
+- Switch Korean / English; listed names also match Hangul or romanization
 - See **Unverified** vs **from a public list** so a tag is not mistaken for a certification
 
 Diet filters are **AND** (every selected diet tag must match). Cuisine and venue filters are **OR** within that axis.

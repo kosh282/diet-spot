@@ -39,3 +39,4 @@ export type KakaoPlace = {
 
 export const DONGUK_CENTER = { lat: 37.5583, lng: 126.9990 };
 export const RETURN_TO_KEY = "dietspot_return_to";
+export const REGISTER_QUERY_KEY = "dietspot_register_query";

@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/i18n";
+import { CUISINE_TAGS, DIET_TAGS, VENUE_TAGS } from "@/lib/tags";
 
 const CHO = ["g", "kk", "n", "d", "tt", "r", "m", "b", "pp", "s", "ss", "", "j", "jj", "ch", "k", "t", "p", "h"];
 const JUNG = [
@@ -179,12 +180,31 @@ export function displayAddress(address: string, locale: Locale) {
 
 export function searchNeedle(query: string) {
   const needle = compactSearchText(query);
-  return needle.length < 2 ? null : needle;
+  return needle.length < 1 ? null : needle;
 }
 
 export function spotSearchHaystack(
-  spot: { name: string; address: string | null; memo: string; memo_en?: string | null },
+  spot: {
+    name: string;
+    address: string | null;
+    memo: string;
+    memo_en?: string | null;
+    diet_tags?: string[];
+    cuisine_tags?: string[];
+    venue_tags?: string[];
+  },
 ) {
+  const tagWords = [
+    ...(spot.diet_tags ?? []),
+    ...(spot.cuisine_tags ?? []),
+    ...(spot.venue_tags ?? []),
+  ].flatMap((value) => {
+    const tag =
+      DIET_TAGS.find((item) => item.value === value) ??
+      CUISINE_TAGS.find((item) => item.value === value) ??
+      VENUE_TAGS.find((item) => item.value === value);
+    return tag ? [tag.value, tag.label, tag.en] : [value];
+  });
   return compactSearchText(
     [
       spot.name,
@@ -193,6 +213,7 @@ export function spotSearchHaystack(
       spot.address ? toLatinAddress(spot.address) : "",
       spot.memo,
       spot.memo_en ?? "",
+      ...tagWords,
     ].join(" "),
   );
 }

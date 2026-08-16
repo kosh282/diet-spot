@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
 import CloseButton from "@/components/shell/CloseButton";
 import PlaceAddress from "@/components/spot/PlaceAddress";
@@ -14,6 +14,7 @@ import type { KakaoPlace, Spot } from "@/lib/types";
 
 type Props = {
   spots: Spot[];
+  initialQuery?: string;
   onClose: () => void;
   onOpenRegistered: (spot: Spot) => void;
   onExisting: (spot: Spot) => void;
@@ -27,9 +28,9 @@ type Props = {
   }) => Promise<void>;
 };
 
-export default function RegisterSheet({ spots, onClose, onOpenRegistered, onExisting, onSave }: Props) {
+export default function RegisterSheet({ spots, initialQuery = "", onClose, onOpenRegistered, onExisting, onSave }: Props) {
   const { t } = useI18n();
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [results, setResults] = useState<KakaoPlace[]>([]);
   const [selected, setSelected] = useState<KakaoPlace | null>(null);
   const [diet, setDiet] = useState<DietTag[]>([]);
@@ -58,9 +59,7 @@ export default function RegisterSheet({ spots, onClose, onOpenRegistered, onExis
     return results.filter((place) => !ids.has(place.id));
   }, [results, registeredHits]);
 
-  async function search(event: FormEvent) {
-    event.preventDefault();
-    const keyword = query.trim();
+  async function lookup(keyword: string) {
     if (!keyword) return;
     setBusy(true);
     setError(null);
@@ -78,6 +77,18 @@ export default function RegisterSheet({ spots, onClose, onOpenRegistered, onExis
     } finally {
       setBusy(false);
     }
+  }
+
+  useEffect(() => {
+    if (!initialQuery.trim()) return;
+    void lookup(initialQuery.trim());
+    // First open from the browse search box should run Kakao once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialQuery]);
+
+  async function search(event: FormEvent) {
+    event.preventDefault();
+    await lookup(query.trim());
   }
 
   function pick(place: KakaoPlace) {
@@ -114,7 +125,7 @@ export default function RegisterSheet({ spots, onClose, onOpenRegistered, onExis
   return (
     <div className="space-y-4">
       <div className="flex items-start justify-between gap-3">
-        <h2 className="text-lg font-semibold">{selected ? t("registerTitle") : t("searchTitle")}</h2>
+        <h2 className="text-lg font-semibold">{t("registerTitle")}</h2>
         <CloseButton onClick={onClose} />
       </div>
 
@@ -128,7 +139,7 @@ export default function RegisterSheet({ spots, onClose, onOpenRegistered, onExis
                 setResults([]);
                 setEmptySearch(false);
               }}
-              placeholder={t("searchPlaceholder")}
+              placeholder={t("registerSearchPlaceholder")}
               autoFocus
               className="h-11 flex-1 rounded-xl border border-slate-200 px-3 text-sm"
             />
@@ -141,7 +152,7 @@ export default function RegisterSheet({ spots, onClose, onOpenRegistered, onExis
             </button>
           </form>
           {emptySearch ? (
-            <p className="text-sm text-slate-500">{t("searchEmpty")}</p>
+            <p className="text-sm text-slate-500">{t("registerSearchEmpty")}</p>
           ) : null}
           {registeredHits.length > 0 ? (
             <div>
