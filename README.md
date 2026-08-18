@@ -23,19 +23,24 @@ DietSpot은 사용자가 식당에 식단 태그와 짧은 메모를 붙이고, 
 
 조회는 가입 없이 됩니다. 올리거나 고칠 때만 Google 로그인이 필요합니다.
 
+공개 주소: [https://diet-spot-ko.vercel.app](https://diet-spot-ko.vercel.app)
+
 ### 할 수 있는 일
 
-- 지도에서 식단 칩(채식, 할랄 등)으로 핀을 걸러 보기
+- 첫 방문 때 화면 정중앙에 서비스 안내가 뜬다. **시작하기** 또는 **다시 보지 않기**를 누르면 다시 안 뜬다
+- 지도에서 식단 칩(채식, 할랄 등)으로 핀을 걸러 보기. 켜 둔 필터는 **필터 지우기**로 한 번에 끈다
 - 상단 검색으로 이미 올라간 상호·주소·태그를 찾아 핀으로 이동
-- 핀을 눌러 주소, 한·영 메모, 원등록자·마지막 수정을 보기
-- 전화, 카카오 장소, 현재 필터가 붙은 지도 링크 공유
-- + 등록으로 카카오에서 식당을 검색해 올리기 (같은 장소는 `place_id`로 중복 불가, 식단 태그 필수)
-- 로그인한 사람이 메모·태그를 고치기 (삭제는 처음 올린 사람만)
+- 왼쪽 아래 **가까운 곳** 목록(기본은 접힘). 내 위치가 있으면 그 기준, 없으면 충무로 기준
+- 핀을 눌러 주소, 한·영 메모, 원등록자·마지막 수정, 최근 방문·전화 확인을 보기
+- 전화번호를 눌러 걸기, 주소 복사, 카카오맵·길찾기, 현재 필터가 붙은 지도 링크 공유
+- 오른쪽 아래 **내 위치**로 지도를 현재 위치로 옮기기
+- ＋ 등록으로 카카오에서 식당을 검색해 올리기 (같은 장소는 `place_id`로 중복 불가, 식단 태그 필수)
+- 로그인한 사람이 메모·태그를 고치기. 수정 중에는 **취소**로 빠져나올 수 있다. 삭제는 처음 올린 사람만
 - 할랄 태그는 처음 올린 사람만 붙이거나 뗄 수 있음
-- 한국어 / English 전환, 로마자로 상호 검색
+- 한국어 / English 전환(모바일 버튼은 바꿀 언어를 보여 줌), 로마자로 상호 검색
 - 미확인 정보와 외부 목록 제보를 배지로 구분해서 보여 주기
 
-식단 필터는 고른 태그를 **모두** 만족하는 곳만 남습니다. 음식 종류·매장 유형은 같은 축 안에서 **하나라도** 맞으면 됩니다.
+식단 필터는 고른 태그를 **모두** 만족하는 곳만 남습니다(채식 칩은 비건 매장도 포함). 음식 종류·매장 유형은 같은 축 안에서 **하나라도** 맞으면 됩니다.
 
 ### 스택
 
@@ -49,6 +54,7 @@ Next.js (App Router, TypeScript) · Tailwind CSS · Supabase (Postgres, Auth, RL
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_KAKAO_JS_KEY=
+NEXT_PUBLIC_SITE_URL=
 ```
 
 2. Supabase SQL Editor에서 `supabase/migrations/` 파일을 번호 순서대로 실행합니다.
@@ -79,19 +85,24 @@ This is **not** an official halal or vegetarian certification. Tags come from li
 
 Anyone can browse. Google sign-in is required only to add or edit.
 
+Live: [https://diet-spot-ko.vercel.app](https://diet-spot-ko.vercel.app)
+
 ### What you can do
 
-- Filter pins with diet chips (vegetarian, halal, and others)
+- On a first visit, a centered intro explains the concept and how to use it. **Get started** or **Don’t show again** keeps it from returning
+- Filter pins with diet chips (vegetarian, halal, and others). **Clear filters** turns them all off at once
 - Search listed names, addresses, and tags from the header and jump to the pin
-- Open a pin for address, Korean and English notes, who added it, and who last edited it
-- Call, open Kakao place info, or share a link that keeps the current filters
+- Open **Nearby** at the bottom left (collapsed by default). Distances use your location when available, otherwise Chungmuro
+- Open a pin for address, Korean and English notes, who added it, who last edited it, and the last phone/visit check
+- Tap the phone number to call, copy the address, open Kakao Map or directions, or share a link that keeps the current filters
+- Use **My location** to pan the map to where you are
 - Use + Add to search Kakao and list a restaurant (duplicate `place_id` is blocked; at least one diet tag is required)
-- Edit notes and tags after login (only the original author can delete)
+- Edit notes and tags after login. **Cancel** leaves edit mode without saving. Only the original author can delete
 - Only the original author can add or remove the Halal tag
-- Switch Korean / English; listed names also match Hangul or romanization
+- Switch Korean / English (the mobile control shows the language you will switch to); listed names also match Hangul or romanization
 - See **Unverified** vs **from a public list** so a tag is not mistaken for a certification
 
-Diet filters are **AND** (every selected diet tag must match). Cuisine and venue filters are **OR** within that axis.
+Diet filters are **AND** (every selected diet tag must match; Vegetarian also matches vegan places). Cuisine and venue filters are **OR** within that axis.
 
 ### Stack
 
@@ -105,6 +116,7 @@ Next.js (App Router, TypeScript) · Tailwind CSS · Supabase (Postgres, Auth, RL
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_KAKAO_JS_KEY=
+NEXT_PUBLIC_SITE_URL=
 ```
 
 2. In the Supabase SQL Editor, run the files in `supabase/migrations/` in order.

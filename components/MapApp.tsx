@@ -8,6 +8,7 @@ import { LocaleProvider, useI18n } from "@/components/i18n/LocaleProvider";
 import KakaoMap from "@/components/map/KakaoMap";
 import DisclaimerBar from "@/components/shell/DisclaimerBar";
 import FilterChips from "@/components/shell/FilterChips";
+import IntroModal from "@/components/shell/IntroModal";
 import LanguageSelect from "@/components/shell/LanguageSelect";
 import PlaceCountBadge from "@/components/shell/PlaceCountBadge";
 import SearchBar from "@/components/shell/SearchBar";
@@ -21,7 +22,7 @@ import SearchModal from "@/components/spot/SearchModal";
 import SpotSearchSheet from "@/components/spot/SpotSearchSheet";
 import { localSeedSpots, persistSeedSpots } from "@/lib/seed-candidates";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
-import { matchesFilters, type TagFilters } from "@/lib/tags";
+import { matchesFilters, EMPTY_FILTERS, type TagFilters } from "@/lib/tags";
 import { emptyMapSearch, parseMapSearch, replaceMapUrl } from "@/lib/map-url";
 import { displayPlaceName } from "@/lib/place-name";
 import { REGISTER_QUERY_KEY, RETURN_TO_KEY, type KakaoPlace, type Spot } from "@/lib/types";
@@ -232,6 +233,22 @@ function MapAppScreen() {
     const timer = window.setTimeout(() => setToast(null), 2800);
     return () => window.clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      if (relocating) {
+        setRelocating(null);
+        setPanel("detail");
+        return;
+      }
+      if (panel === "none") return;
+      if (panel === "detail") setSelected(null);
+      setPanel("none");
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [panel, relocating]);
 
   async function shareCurrent() {
     replaceMapUrl({
@@ -666,14 +683,10 @@ function MapAppScreen() {
 
       {panel === "login" || (panel === "detail" && selected) ? (
         <OverlayPanel
-          onClose={
-            panel === "detail"
-              ? () => {
-                  setSelected(null);
-                  setPanel("none");
-                }
-              : undefined
-          }
+          onClose={() => {
+            if (panel === "detail") setSelected(null);
+            setPanel("none");
+          }}
         >
           {panel === "login" ? (
             <LoginSheet
@@ -710,7 +723,7 @@ function MapAppScreen() {
       ) : null}
 
       {loadError ? (
-        <div className="absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-xl bg-white px-4 py-3 text-sm shadow-lg">
+        <div className="absolute left-1/2 z-40 w-[min(90vw,22rem)] -translate-x-1/2 rounded-xl bg-white px-4 py-3 text-sm shadow-lg top-[max(7.25rem,calc(env(safe-area-inset-top)+6.5rem))]">
           {loadError}
           <button
             type="button"
@@ -726,28 +739,40 @@ function MapAppScreen() {
       ) : null}
 
       {!loading && !loadError && spots.length === 0 && panel === "none" ? (
-        <div className="absolute left-1/2 top-28 z-20 w-[min(90vw,22rem)] -translate-x-1/2 rounded-2xl bg-white/95 p-4 text-center text-sm shadow-lg">
+        <div className="absolute left-1/2 z-20 w-[min(90vw,22rem)] -translate-x-1/2 rounded-2xl bg-white/95 p-4 text-center text-sm shadow-lg top-[max(7.5rem,calc(env(safe-area-inset-top)+6.75rem))]">
           {t("emptySpots")}
         </div>
       ) : null}
 
       {toast ? (
-        <div className="absolute left-1/2 top-24 z-30 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white">
+        <div className="absolute left-1/2 z-40 max-w-[min(90vw,22rem)] -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg top-[max(7.25rem,calc(env(safe-area-inset-top)+6.5rem))]">
           {toast}
         </div>
       ) : null}
 
       {visible.length === 0 && openSpots.length === 0 && spots.length > 0 && !showClosed ? (
-        <div className="absolute left-1/2 top-24 z-20 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white">
+        <div className="absolute left-1/2 z-40 flex max-w-[min(90vw,22rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg top-[max(7.25rem,calc(env(safe-area-inset-top)+6.5rem))]">
           {t("onlyClosed")}
         </div>
       ) : null}
 
       {visible.length === 0 && (showClosed ? spots : openSpots).length > 0 ? (
-        <div className="absolute left-1/2 top-24 z-20 -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white">
-          {t("noMatches")}
+        <div className="absolute left-1/2 z-40 flex max-w-[min(90vw,22rem)] -translate-x-1/2 items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg top-[max(7.25rem,calc(env(safe-area-inset-top)+6.5rem))]">
+          <span>{t("noMatches")}</span>
+          <button
+            type="button"
+          className="underline decoration-white/60"
+            onClick={() => {
+              setFilters({ ...EMPTY_FILTERS });
+              setShowClosed(false);
+            }}
+          >
+            {t("clearFilters")}
+          </button>
         </div>
       ) : null}
+
+      <IntroModal />
     </div>
   );
 }

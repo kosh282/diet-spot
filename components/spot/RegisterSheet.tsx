@@ -145,8 +145,8 @@ export default function RegisterSheet({ spots, initialQuery = "", onClose, onOpe
             />
             <button
               type="submit"
-              disabled={busy}
-              className="h-11 rounded-xl bg-[var(--pin)] px-4 text-sm font-medium text-white"
+              disabled={busy || !query.trim()}
+              className="h-11 rounded-xl bg-[var(--pin)] px-4 text-sm font-medium text-white disabled:opacity-40"
             >
               {t("search")}
             </button>

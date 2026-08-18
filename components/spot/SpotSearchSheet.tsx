@@ -52,19 +52,31 @@ export default function SpotSearchSheet({ spots, origin, onClose, onSelect, onAd
         <h2 className="text-lg font-semibold">{t("searchTitle")}</h2>
         <CloseButton onClick={onClose} />
       </div>
-      <input
-        value={query}
-        onChange={(event) => setQuery(event.target.value)}
-        onKeyDown={(event) => {
-          if (event.key !== "Enter") return;
-          event.preventDefault();
-          if (hits[0]) onSelect(hits[0]);
-          else if (noHits) onAdd(query.trim());
-        }}
-        placeholder={t("searchPlaceholder")}
-        autoFocus
-        className="h-11 w-full rounded-xl border border-slate-200 px-3 text-sm"
-      />
+      <div className="relative">
+        <input
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key !== "Enter") return;
+            event.preventDefault();
+            if (needle && hits[0]) onSelect(hits[0]);
+            else if (noHits) onAdd(query.trim());
+          }}
+          placeholder={t("searchPlaceholder")}
+          autoFocus
+          className="h-11 w-full rounded-xl border border-slate-200 px-3 pr-10 text-sm"
+        />
+        {query ? (
+          <button
+            type="button"
+            onClick={() => setQuery("")}
+            aria-label={t("close")}
+            className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center text-lg text-slate-400"
+          >
+            ×
+          </button>
+        ) : null}
+      </div>
       {emptyQuery ? <p className="text-xs text-slate-500">{t("searchNearby")}</p> : null}
       {noHits ? (
         <div className="space-y-2">

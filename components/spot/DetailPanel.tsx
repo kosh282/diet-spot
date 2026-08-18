@@ -62,7 +62,9 @@ export default function DetailPanel({
   const [phone, setPhone] = useState(spot.phone);
   const [placeUrl, setPlaceUrl] = useState(kakaoPlacePageUrl(spot.place_url, spot.place_id));
   const [lookingUp, setLookingUp] = useState(!kakaoPlacePageUrl(spot.place_url, spot.place_id));
+  const [copied, setCopied] = useState(false);
   const [edits, setEdits] = useState<{ edited_nickname: string; diet_tags: string[]; created_at: string }[]>([]);
+  const confirmedToday = Boolean(spot.last_confirmed_at && isSameLocalDay(spot.last_confirmed_at));
 
   useEffect(() => {
     const stored = kakaoPlacePageUrl(spot.place_url, spot.place_id);
@@ -105,6 +107,41 @@ export default function DetailPanel({
     ...spot.venue_tags.slice(0, 1).map((tag) => venueLabel(tag, locale)),
   ].join(" · ");
   const shownMemo = memoForLocale(spot, locale);
+  const tel = phone?.replace(/[^\d+]/g, "") ?? "";
+
+  function cancelEdit() {
+    setDiet(spot.diet_tags as DietTag[]);
+    setCuisine(spot.cuisine_tags as CuisineTag[]);
+    setVenue(spot.venue_tags as VenueTag[]);
+    setMemo(spot.memo);
+    setMemoEn(spot.memo_en ?? "");
+    setAddress(spot.address ?? "");
+    setEditing(false);
+    setError(null);
+  }
+
+  useEffect(() => {
+    if (!editing) return;
+    function onKey(event: KeyboardEvent) {
+      if (event.key !== "Escape") return;
+      event.stopImmediatePropagation();
+      cancelEdit();
+    }
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
+  }, [editing, spot]);
+
+  async function copyAddress() {
+    const text = spot.address?.trim();
+    if (!text) return;
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setError(t("copyFailed"));
+    }
+  }
 
   async function save() {
     if (diet.length < 1) return;
@@ -209,12 +246,13 @@ export default function DetailPanel({
         {!editing ? (
           <button
             type="button"
-            disabled={busy}
+            disabled={busy || confirmedToday}
             onClick={() => {
               if (!user) {
                 onRequestLogin();
                 return;
               }
+              if (confirmedToday) return;
               if (!window.confirm(t("confirmVisitHint"))) return;
               setBusy(true);
               setError(null);
@@ -224,9 +262,9 @@ export default function DetailPanel({
                 })
                 .finally(() => setBusy(false));
             }}
-            className="mt-2 text-xs font-medium text-[var(--pin)]"
+            className="mt-2 text-xs font-medium text-[var(--pin)] disabled:text-slate-400"
           >
-            {t("confirmVisit")}
+            {confirmedToday ? t("confirmVisitAlready") : t("confirmVisit")}
           </button>
         ) : null}
       </div>
@@ -251,7 +289,25 @@ export default function DetailPanel({
               <PlaceAddress address={spot.address} className="text-sm text-slate-700" />
             ) : null}
             {phone ? (
-              <p className={`text-sm text-slate-600 ${spot.address ? "mt-1" : ""}`}>{phone}</p>
+              tel ? (
+                <a
+                  href={`tel:${tel}`}
+                  className={`block text-sm text-[var(--pin)] ${spot.address ? "mt-1" : ""}`}
+                >
+                  {phone}
+                </a>
+              ) : (
+                <p className={`text-sm text-slate-600 ${spot.address ? "mt-1" : ""}`}>{phone}</p>
+              )
+            ) : null}
+            {spot.address ? (
+              <button
+                type="button"
+                onClick={() => void copyAddress()}
+                className="mt-1 text-xs font-medium text-[var(--pin)]"
+              >
+                {copied ? t("addressCopied") : t("copyAddress")}
+              </button>
             ) : null}
           </div>
           <button
@@ -396,14 +452,24 @@ export default function DetailPanel({
 
       <div className="flex gap-2">
         {editing ? (
-          <button
-            type="button"
-            disabled={diet.length < 1 || busy}
-            onClick={save}
-            className="h-10 flex-1 rounded-xl bg-[var(--pin)] text-sm font-medium text-white disabled:opacity-40"
-          >
-            {t("save")}
-          </button>
+          <>
+            <button
+              type="button"
+              disabled={busy}
+              onClick={cancelEdit}
+              className="h-10 rounded-xl px-3 text-sm text-slate-600 ring-1 ring-slate-200"
+            >
+              {t("cancel")}
+            </button>
+            <button
+              type="button"
+              disabled={diet.length < 1 || busy}
+              onClick={save}
+              className="h-10 flex-1 rounded-xl bg-[var(--pin)] text-sm font-medium text-white disabled:opacity-40"
+            >
+              {t("save")}
+            </button>
+          </>
         ) : (
           <button
             type="button"

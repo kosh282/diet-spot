@@ -16,7 +16,7 @@ export default function LanguageSelect() {
         title={t("language")}
         className="card flex h-11 w-11 shrink-0 items-center justify-center text-xs font-semibold text-slate-700 md:hidden"
       >
-        {locale.toUpperCase()}
+        {other.toUpperCase()}
       </button>
       <div
         role="group"

@@ -5,6 +5,7 @@ import { useI18n } from "@/components/i18n/LocaleProvider";
 import {
   CUISINE_TAGS,
   DIET_TAGS,
+  EMPTY_FILTERS,
   VENUE_TAGS,
   cuisineLabel,
   dietChipLabel,
@@ -25,6 +26,11 @@ export default function FilterChips({ filters, onChange, showClosed, onShowClose
   const [more, setMore] = useState(
     () => filters.cuisine.length > 0 || filters.venue.length > 0 || showClosed,
   );
+  const filtered =
+    filters.diet.length > 0 ||
+    filters.cuisine.length > 0 ||
+    filters.venue.length > 0 ||
+    showClosed;
 
   return (
     <div className="card max-w-full space-y-2 px-3 py-2">
@@ -53,6 +59,18 @@ export default function FilterChips({ filters, onChange, showClosed, onShowClose
         >
           {more ? t("less") : t("more")}
         </button>
+        {filtered ? (
+          <button
+            type="button"
+            onClick={() => {
+              onChange({ ...EMPTY_FILTERS });
+              onShowClosed(false);
+            }}
+            className="shrink-0 rounded-full px-3.5 py-2 text-sm font-medium text-[var(--pin)] ring-1 ring-[var(--pin)]/30 md:px-3 md:py-1 md:text-xs"
+          >
+            {t("clearFilters")}
+          </button>
+        ) : null}
       </div>
       {more ? (
         <div className="space-y-2 max-md:max-h-[32vh] max-md:overflow-y-auto max-md:overscroll-contain">
