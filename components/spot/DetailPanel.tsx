@@ -7,13 +7,13 @@ import CloseButton from "@/components/shell/CloseButton";
 import PlaceAddress from "@/components/spot/PlaceAddress";
 import PlaceName from "@/components/spot/PlaceName";
 import TagPicker from "@/components/spot/TagPicker";
-import { kakaoPlacePageUrl, resolveKakaoPlacePage } from "@/lib/kakao";
+import { kakaoDirectionsUrl, kakaoPlacePageUrl, resolveKakaoPlacePage } from "@/lib/kakao";
 import { memoForLocale } from "@/lib/place-name";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 import { cuisineLabel, dietChipLabel, dietLabel, venueLabel, type CuisineTag, type DietTag, type VenueTag } from "@/lib/tags";
 import { hasHalal, halalDietChanged, spotTrust } from "@/lib/trust";
 import type { Spot } from "@/lib/types";
-import { formatDate } from "@/lib/user";
+import { formatDate, isSameLocalDay } from "@/lib/user";
 
 type Props = {
   spot: Spot;
@@ -32,6 +32,7 @@ type Props = {
   onStartRelocate: () => void;
   onDelete: () => Promise<void>;
   onShare: () => Promise<void>;
+  onConfirmVisit: () => Promise<void>;
 };
 
 export default function DetailPanel({
@@ -44,6 +45,7 @@ export default function DetailPanel({
   onStartRelocate,
   onDelete,
   onShare,
+  onConfirmVisit,
 }: Props) {
   const { locale, t } = useI18n();
   const isOwner = Boolean(user && user.id === spot.created_by);
@@ -193,6 +195,40 @@ export default function DetailPanel({
         {hasHalal(spot.diet_tags) ? (
           <p className="mt-1 text-xs font-medium">{t("halalNotCertified")}</p>
         ) : null}
+        <p className="mt-2 text-xs">
+          {t("lastConfirmed")}:{" "}
+          {spot.last_confirmed_at
+            ? isSameLocalDay(spot.last_confirmed_at)
+              ? t("lastConfirmedToday", { name: spot.last_confirmed_nickname ?? "" })
+              : t("lastConfirmedOn", {
+                  date: formatDate(spot.last_confirmed_at),
+                  name: spot.last_confirmed_nickname ?? "",
+                })
+            : t("lastConfirmedNever")}
+        </p>
+        {!editing ? (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => {
+              if (!user) {
+                onRequestLogin();
+                return;
+              }
+              if (!window.confirm(t("confirmVisitHint"))) return;
+              setBusy(true);
+              setError(null);
+              void onConfirmVisit()
+                .catch((err) => {
+                  setError(err instanceof Error ? err.message : t("confirmVisitFailed"));
+                })
+                .finally(() => setBusy(false));
+            }}
+            className="mt-2 text-xs font-medium text-[var(--pin)]"
+          >
+            {t("confirmVisit")}
+          </button>
+        ) : null}
       </div>
 
       {editing ? (
@@ -240,19 +276,27 @@ export default function DetailPanel({
             href={placeUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="col-span-2 flex h-11 items-center justify-center rounded-xl text-sm font-medium text-[var(--pin)] ring-1 ring-slate-200"
+            className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs font-medium text-[var(--pin)] ring-1 ring-slate-200 md:text-sm"
           >
             {t("kakaoPlace")}
           </a>
         ) : lookingUp ? (
-          <span className="col-span-2 flex h-11 items-center justify-center rounded-xl text-xs text-slate-400 ring-1 ring-slate-200">
+          <span className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs text-slate-400 ring-1 ring-slate-200">
             {t("lookingUpPlace")}
           </span>
         ) : (
-          <span className="col-span-2 flex h-11 items-center justify-center rounded-xl text-xs text-slate-400 ring-1 ring-slate-200">
+          <span className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs text-slate-400 ring-1 ring-slate-200">
             {t("kakaoPlace")}
           </span>
         )}
+        <a
+          href={kakaoDirectionsUrl(spot)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex h-11 items-center justify-center rounded-xl text-sm font-medium text-[var(--pin)] ring-1 ring-slate-200"
+        >
+          {t("directions")}
+        </a>
         <button
           type="button"
           onClick={() => void onShare()}

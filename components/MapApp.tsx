@@ -13,6 +13,7 @@ import PlaceCountBadge from "@/components/shell/PlaceCountBadge";
 import SearchBar from "@/components/shell/SearchBar";
 import ShareButton from "@/components/shell/ShareButton";
 import DetailPanel from "@/components/spot/DetailPanel";
+import NearbyList from "@/components/spot/NearbyList";
 import OverlayPanel from "@/components/spot/OverlayPanel";
 import PlaceName from "@/components/spot/PlaceName";
 import RegisterSheet from "@/components/spot/RegisterSheet";
@@ -171,8 +172,8 @@ function MapAppScreen() {
       setPanel("register");
       return;
     }
-    if (next.startsWith("edit:")) {
-      const id = next.slice(5);
+    if (next.startsWith("edit:") || next.startsWith("confirm:")) {
+      const id = next.slice(next.indexOf(":") + 1);
       const spot = spots.find((item) => item.id === id);
       if (spot) {
         setSelected(spot);
@@ -435,6 +436,29 @@ function MapAppScreen() {
     }
   }
 
+  async function confirmVisit() {
+    if (!supabase || !user || !selected) {
+      requireLogin(selected ? `confirm:${selected.id}` : "register");
+      throw new Error(t("loginAgain"));
+    }
+    const nickname = displayNameFromUser(user, t("userFallback"));
+    const { data, error } = await supabase
+      .from("spots")
+      .update({
+        last_confirmed_at: new Date().toISOString(),
+        last_confirmed_by: user.id,
+        last_confirmed_nickname: nickname,
+      })
+      .eq("id", selected.id)
+      .select("*")
+      .single();
+    if (error) throw new Error(error.message);
+    const updated = data as Spot;
+    setSpots((current) => current.map((spot) => (spot.id === updated.id ? updated : spot)));
+    setSelected(updated);
+    setToast(t("confirmVisitDone"));
+  }
+
   async function setSpotClosed(closed: boolean) {
     await updateSpot({ closed });
     setToast(closed ? t("markedClosed") : t("markedOpen"));
@@ -523,6 +547,18 @@ function MapAppScreen() {
             relocating || panel !== "none" ? "max-md:hidden" : ""
           } ${relocating ? "hidden" : ""}`}
         >
+          {panel === "none" && !relocating ? (
+            <NearbyList
+              spots={visible.filter((spot) => !spot.closed || showClosed)}
+              origin={userLocation}
+              fromYou={Boolean(userLocation)}
+              onPick={(spot) => {
+                setSelected(spot);
+                setPanel("detail");
+                mapApi.current?.panTo(spot.lat, spot.lng);
+              }}
+            />
+          ) : null}
           <PlaceCountBadge visible={visible.length} total={showClosed ? spots.length : openSpots.length} />
           <DisclaimerBar />
         </div>
@@ -661,6 +697,7 @@ function MapAppScreen() {
               onStartRelocate={startRelocate}
               onDelete={deleteSpot}
               onShare={shareCurrent}
+              onConfirmVisit={confirmVisit}
             />
           ) : null}
         </OverlayPanel>

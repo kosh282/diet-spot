@@ -100,6 +100,18 @@ const ko = {
   mapFailed: "지도를 불러오지 못했어요.",
   userFallback: "사용자",
   language: "언어",
+  nearbyTitle: "가까운 곳",
+  nearbyFromMe: "내 위치 기준",
+  nearbyFromCenter: "충무로 기준",
+  directions: "길찾기",
+  lastConfirmed: "최근 확인",
+  lastConfirmedNever: "아직 방문·전화 확인이 없어요.",
+  lastConfirmedToday: "오늘 · {name}",
+  lastConfirmedOn: "{date} · {name}",
+  confirmVisit: "오늘 확인함",
+  confirmVisitHint: "매장에 전화하거나 방문해서 태그가 맞는지 확인했나요? 공식 인증은 아닙니다.",
+  confirmVisitDone: "오늘 확인으로 표시했어요.",
+  confirmVisitFailed: "확인 표시를 저장하지 못했어요.",
 };
 
 const en: { [K in keyof typeof ko]: string } = {
@@ -199,6 +211,18 @@ const en: { [K in keyof typeof ko]: string } = {
   mapFailed: "Could not load the map.",
   userFallback: "User",
   language: "Language",
+  nearbyTitle: "Nearby",
+  nearbyFromMe: "From you",
+  nearbyFromCenter: "From Chungmuro",
+  directions: "Directions",
+  lastConfirmed: "Last checked",
+  lastConfirmedNever: "Nobody has phone- or visit-checked this yet.",
+  lastConfirmedToday: "Today · {name}",
+  lastConfirmedOn: "{date} · {name}",
+  confirmVisit: "I checked today",
+  confirmVisitHint: "Did you call or visit and confirm the tags? This is not an official certification.",
+  confirmVisitDone: "Marked as checked today.",
+  confirmVisitFailed: "Could not save the check.",
 };
 
 const messages = { ko, en } as const;

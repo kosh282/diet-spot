@@ -142,6 +142,9 @@ export function localSeedSpots(): Spot[] {
     phone: null,
     place_url: null,
     closed: false,
+    last_confirmed_at: null,
+    last_confirmed_by: null,
+    last_confirmed_nickname: null,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   }));

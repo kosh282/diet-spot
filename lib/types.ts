@@ -22,6 +22,9 @@ export type Spot = {
   phone: string | null;
   place_url: string | null;
   closed: boolean;
+  last_confirmed_at: string | null;
+  last_confirmed_by: string | null;
+  last_confirmed_nickname: string | null;
   created_at: string;
   updated_at: string;
 };
