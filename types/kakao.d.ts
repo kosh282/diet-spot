@@ -47,6 +47,16 @@ type KakaoNamespace = {
       fillOpacity?: number;
       zIndex?: number;
     }) => KakaoCircle;
+    Polyline: new (options: {
+      map?: KakaoMap;
+      path: KakaoLatLng[];
+      strokeWeight?: number;
+      strokeColor?: string;
+      strokeOpacity?: number;
+      strokeStyle?: string;
+      zIndex?: number;
+    }) => KakaoPolyline;
+    LatLngBounds: new () => KakaoLatLngBounds;
     Size: new (width: number, height: number) => KakaoSize;
     Point: new (x: number, y: number) => KakaoPoint;
     event: {
@@ -81,10 +91,26 @@ export type KakaoMouseEvent = {
 export type KakaoMap = {
   setCenter: (latlng: KakaoLatLng) => void;
   panTo: (latlng: KakaoLatLng) => void;
+  setBounds: (
+    bounds: KakaoLatLngBounds,
+    paddingTop?: number,
+    paddingRight?: number,
+    paddingBottom?: number,
+    paddingLeft?: number,
+  ) => void;
   getCenter: () => KakaoLatLng;
   getLevel: () => number;
   setLevel: (level: number) => void;
   relayout: () => void;
+};
+
+export type KakaoLatLngBounds = {
+  extend: (latlng: KakaoLatLng) => void;
+};
+
+export type KakaoPolyline = {
+  setMap: (map: KakaoMap | null) => void;
+  setPath: (path: KakaoLatLng[]) => void;
 };
 
 export type KakaoCustomOverlay = {

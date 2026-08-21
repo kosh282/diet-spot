@@ -151,8 +151,38 @@ export function displayPlaceName(name: string, locale: Locale) {
   return { primary: latin, secondary: name };
 }
 
+const PLACE_AREAS: [string, string][] = [
+  ["서울특별시", "Seoul"],
+  ["서울시", "Seoul"],
+  ["서울", "Seoul"],
+  ["중구", "Jung-gu"],
+  ["용산구", "Yongsan-gu"],
+  ["종로구", "Jongno-gu"],
+  ["마포구", "Mapo-gu"],
+  ["서대문구", "Seodaemun-gu"],
+  ["성동구", "Seongdong-gu"],
+  ["동대문구", "Dongdaemun-gu"],
+  ["광진구", "Gwangjin-gu"],
+  ["강남구", "Gangnam-gu"],
+  ["서초구", "Seocho-gu"],
+  ["영등포구", "Yeongdeungpo-gu"],
+  ["충무로", "Chungmuro"],
+  ["명동", "Myeongdong"],
+  ["이태원", "Itaewon"],
+  ["한남동", "Hannam-dong"],
+  ["필동", "Pil-dong"],
+  ["장충동", "Jangchung-dong"],
+  ["회현동", "Hoehyeon-dong"],
+  ["남산동", "Namsan-dong"],
+  ["동국대", "Dongguk Univ."],
+];
+
 function toLatinAddress(address: string) {
-  const spaced = address
+  let text = address;
+  for (const [hangul, english] of PLACE_AREAS) {
+    text = text.replaceAll(hangul, ` ${english} `);
+  }
+  const spaced = text
     .replace(/([가-힣])(\d)/g, "$1 $2")
     .replace(/(\d)([가-힣])/g, "$1 $2");
   return romanizeHangul(spaced)
@@ -164,7 +194,9 @@ function toLatinAddress(address: string) {
     .replace(/\b([A-Za-z]+)(gu|si|dong|ro|gil)\b/gi, (_, stem: string, suffix: string) => {
       const lower = suffix.toLowerCase();
       return `${stem.charAt(0).toUpperCase()}${stem.slice(1).toLowerCase()}-${lower}`;
-    });
+    })
+    .replace(/\bSeoul-si\b/gi, "Seoul")
+    .replace(/\bJung-gu-gu\b/gi, "Jung-gu");
 }
 
 export function displayAddress(address: string, locale: Locale) {

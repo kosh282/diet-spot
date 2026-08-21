@@ -26,10 +26,7 @@ export function kakaoMapPinUrl(spot: { name: string; lat: number; lng: number })
   return `https://map.kakao.com/link/map/${encodeURIComponent(spot.name)},${spot.lat},${spot.lng}`;
 }
 
-export function kakaoDirectionsUrl(spot: { name: string; lat: number; lng: number }) {
-  const name = spot.name.replace(/,/g, " ").trim();
-  return `https://map.kakao.com/link/to/${encodeURIComponent(name)},${spot.lat},${spot.lng}`;
-}
+export { kakaoDirectionsUrl } from "@/lib/directions";
 
 function toKakaoPlace(item: KakaoSearchItem): KakaoPlace {
   return {

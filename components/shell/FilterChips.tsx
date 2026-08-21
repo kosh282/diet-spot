@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useI18n } from "@/components/i18n/LocaleProvider";
 import {
   CUISINE_TAGS,
@@ -23,6 +23,7 @@ type Props = {
 
 export default function FilterChips({ filters, onChange, showClosed, onShowClosed }: Props) {
   const { locale, t } = useI18n();
+  const rootRef = useRef<HTMLDivElement>(null);
   const [more, setMore] = useState(
     () => filters.cuisine.length > 0 || filters.venue.length > 0 || showClosed,
   );
@@ -32,8 +33,29 @@ export default function FilterChips({ filters, onChange, showClosed, onShowClose
     filters.venue.length > 0 ||
     showClosed;
 
+  useEffect(() => {
+    if (!more) return;
+
+    function onPointerDown(event: PointerEvent) {
+      const root = rootRef.current;
+      if (!root || !(event.target instanceof Node)) return;
+      if (!root.contains(event.target)) setMore(false);
+    }
+
+    function onKey(event: KeyboardEvent) {
+      if (event.key === "Escape") setMore(false);
+    }
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [more]);
+
   return (
-    <div className="card max-w-full space-y-2 px-3 py-2">
+    <div ref={rootRef} className="card max-w-full space-y-2 px-3 py-2">
       <div className="ds-chip-scroll">
         {DIET_TAGS.map((tag) => {
           const on = filters.diet.includes(tag.value);

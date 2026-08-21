@@ -700,6 +700,7 @@ function MapAppScreen() {
               key={selected.id}
               spot={selected}
               user={user}
+              origin={userLocation}
               onClose={() => {
                 setSelected(null);
                 setPanel("none");

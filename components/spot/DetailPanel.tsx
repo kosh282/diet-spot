@@ -7,17 +7,20 @@ import CloseButton from "@/components/shell/CloseButton";
 import PlaceAddress from "@/components/spot/PlaceAddress";
 import PlaceName from "@/components/spot/PlaceName";
 import TagPicker from "@/components/spot/TagPicker";
-import { kakaoDirectionsUrl, kakaoPlacePageUrl, resolveKakaoPlacePage } from "@/lib/kakao";
+import { kakaoPlacePageUrl, resolveKakaoPlacePage } from "@/lib/kakao";
+import { routeSummary } from "@/lib/directions";
+import DirectionsSheet from "@/components/spot/DirectionsSheet";
 import { memoForLocale } from "@/lib/place-name";
 import { createClient, hasSupabaseConfig } from "@/lib/supabase/client";
 import { cuisineLabel, dietChipLabel, dietLabel, venueLabel, type CuisineTag, type DietTag, type VenueTag } from "@/lib/tags";
 import { hasHalal, halalDietChanged, spotTrust } from "@/lib/trust";
-import type { Spot } from "@/lib/types";
+import { DONGUK_CENTER, type Spot } from "@/lib/types";
 import { formatDate, isSameLocalDay } from "@/lib/user";
 
 type Props = {
   spot: Spot;
   user: User | null;
+  origin?: { lat: number; lng: number } | null;
   onClose: () => void;
   onRequestLogin: () => void;
   onSave: (patch: {
@@ -38,6 +41,7 @@ type Props = {
 export default function DetailPanel({
   spot,
   user,
+  origin = null,
   onClose,
   onRequestLogin,
   onSave,
@@ -63,8 +67,12 @@ export default function DetailPanel({
   const [placeUrl, setPlaceUrl] = useState(kakaoPlacePageUrl(spot.place_url, spot.place_id));
   const [lookingUp, setLookingUp] = useState(!kakaoPlacePageUrl(spot.place_url, spot.place_id));
   const [copied, setCopied] = useState(false);
+  const [directionsOpen, setDirectionsOpen] = useState(false);
   const [edits, setEdits] = useState<{ edited_nickname: string; diet_tags: string[]; created_at: string }[]>([]);
   const confirmedToday = Boolean(spot.last_confirmed_at && isSameLocalDay(spot.last_confirmed_at));
+  const routeOrigin = origin ?? DONGUK_CENTER;
+  const fromYou = Boolean(origin);
+  const summaryRoute = routeSummary(routeOrigin, spot);
 
   useEffect(() => {
     const stored = kakaoPlacePageUrl(spot.place_url, spot.place_id);
@@ -205,18 +213,64 @@ export default function DetailPanel({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h2 className="text-xl font-semibold">
-            <PlaceName name={spot.name} as="span" />
-          </h2>
-          <p className="mt-0.5 text-sm text-slate-500">{summary}</p>
-          {spot.closed ? (
-            <p className="mt-1 text-xs font-medium text-slate-500">{t("closedBadge")}</p>
-          ) : null}
+      <div className="sticky top-0 z-10 -mx-4 space-y-3 border-b border-slate-100 bg-white px-4 pb-3 pt-0 md:static md:mx-0 md:border-0 md:bg-transparent md:px-0 md:pb-0">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-xl font-semibold">
+              <PlaceName
+                name={spot.name}
+                as="span"
+                secondaryClassName="mt-0.5 block text-sm font-normal text-slate-500"
+              />
+            </h2>
+            <p className="mt-0.5 text-sm text-slate-500">{summary}</p>
+            {spot.closed ? (
+              <p className="mt-1 text-xs font-medium text-slate-500">{t("closedBadge")}</p>
+            ) : null}
+          </div>
+          <CloseButton onClick={onClose} />
         </div>
-        <CloseButton onClick={onClose} />
+
+        <div className="grid grid-cols-3 gap-2">
+          {placeUrl ? (
+            <a
+              href={placeUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs font-medium text-[var(--pin)] ring-1 ring-slate-200 md:text-sm"
+            >
+              {t("kakaoPlace")}
+            </a>
+          ) : lookingUp ? (
+            <span className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs text-slate-400 ring-1 ring-slate-200">
+              {t("lookingUpPlace")}
+            </span>
+          ) : (
+            <span className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs text-slate-400 ring-1 ring-slate-200">
+              {t("kakaoPlace")}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setDirectionsOpen(true)}
+            className="flex h-11 flex-col items-center justify-center rounded-xl px-1 text-center text-sm font-medium text-[var(--pin)] ring-1 ring-slate-200"
+          >
+            <span>{t("directions")}</span>
+            <span className="text-[10px] font-normal text-slate-500">{summaryRoute.distanceLabel}</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => void onShare()}
+            className="flex h-11 items-center justify-center rounded-xl text-sm font-medium text-slate-700 ring-1 ring-slate-200"
+          >
+            {t("sharePlace")}
+          </button>
+        </div>
       </div>
+
+      {locale === "en" ? (
+        <p className="text-[11px] leading-snug text-slate-500">{t("mapLabelsNote")}</p>
+      ) : null}
 
       <div
         className={`rounded-xl px-3 py-2.5 text-sm ${
@@ -325,42 +379,6 @@ export default function DetailPanel({
           </button>
         </div>
       )}
-
-      <div className="grid grid-cols-3 gap-2">
-        {placeUrl ? (
-          <a
-            href={placeUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs font-medium text-[var(--pin)] ring-1 ring-slate-200 md:text-sm"
-          >
-            {t("kakaoPlace")}
-          </a>
-        ) : lookingUp ? (
-          <span className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs text-slate-400 ring-1 ring-slate-200">
-            {t("lookingUpPlace")}
-          </span>
-        ) : (
-          <span className="flex h-11 items-center justify-center rounded-xl px-1 text-center text-xs text-slate-400 ring-1 ring-slate-200">
-            {t("kakaoPlace")}
-          </span>
-        )}
-        <a
-          href={kakaoDirectionsUrl(spot)}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex h-11 items-center justify-center rounded-xl text-sm font-medium text-[var(--pin)] ring-1 ring-slate-200"
-        >
-          {t("directions")}
-        </a>
-        <button
-          type="button"
-          onClick={() => void onShare()}
-          className="flex h-11 items-center justify-center rounded-xl text-sm font-medium text-slate-700 ring-1 ring-slate-200"
-        >
-          {t("sharePlace")}
-        </button>
-      </div>
 
       {editing ? (
         <>
@@ -504,6 +522,15 @@ export default function DetailPanel({
           </button>
         ) : null}
       </div>
+
+      {directionsOpen ? (
+        <DirectionsSheet
+          spot={spot}
+          origin={routeOrigin}
+          fromYou={fromYou}
+          onClose={() => setDirectionsOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }
